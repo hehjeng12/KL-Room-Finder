@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>RoomRental.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SkiaSharp (MIT licence) is used to generate web-sized thumbnails from the original phone photos. -->
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Data\listings.json" CopyToPublishDirectory="PreserveNewest" />
+    <Content Remove="App_Data\**" />
+  </ItemGroup>
+
+</Project>
