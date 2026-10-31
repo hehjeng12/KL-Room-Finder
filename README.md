@@ -158,7 +158,14 @@ cd "C:\House Renting Information\website"
 
 The live site is **https://kl-room-finder.pages.dev**. Later runs upload only changed files.
 
-If PowerShell refuses to run the script because it isn't signed, run the same steps by hand:
+If PowerShell refuses to run the script because it isn't signed (`...is not digitally signed`), use the batch-file version instead. It does the same steps, and PowerShell's signing rule doesn't apply to `.cmd` files:
+
+```powershell
+cd "C:\House Renting Information\website"
+.\publish.cmd deploy        # or .\publish.cmd to build only
+```
+
+Or run the same steps by hand:
 
 ```powershell
 cd "C:\House Renting Information\website\client"
