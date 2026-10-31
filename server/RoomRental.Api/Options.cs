@@ -39,6 +39,12 @@ public sealed class MediaOptions
     /// <summary>Folder that holds the property folders. Relative paths resolve against the app's content root.</summary>
     public string RootPath { get; set; } = "";
 
+    /// <summary>
+    /// More folders laid out the same way (Property / Unit / Room). A property found in several folders is
+    /// merged into one listing. Machine-specific, so set it in appsettings.Local.json.
+    /// </summary>
+    public string[] ExtraRootPaths { get; set; } = Array.Empty<string>();
+
     /// <summary>Top-level folder names that are never published (for example this website's own source).</summary>
     public string[] ExcludedFolders { get; set; } = Array.Empty<string>();
 

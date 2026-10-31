@@ -76,6 +76,14 @@ The rednote QR image (`client/public/rednote-qr.png`) is git-ignored for the sam
 
 Brand name, tagline and copyright text stay in the public `appsettings.json`.
 
+**Extra media folders.** New batches of rooms can live in their own folder, with the same `Property / Unit / Room` layout, instead of being copied into the main one. List them in `appsettings.Local.json`:
+
+```json
+"Media": { "ExtraRootPaths": [ "C:/Room Renting V2" ] }
+```
+
+A property found in more than one folder (for example `Vierra` in both) is merged into one listing. Identical copies of a file in the same room folder, such as `photo.jpg` and `photo(1).jpg`, are shown once. Folders downloaded from Google Drive as `.zip` files must be extracted first.
+
 - rednote (小红书) has no pre-filled message links, so its button opens a card with your QR code (`client/public/rednote-qr.png`), your ID (tap to copy) and a "copy enquiry message" button. `RednoteUrl` is optional: in the app, go to *Profile → Share → Copy link* and paste the link here to add an "Open my profile" button.
 
 - `WhatsAppNumber`: international format, digits only (Malaysia = `60` + number without the leading 0).

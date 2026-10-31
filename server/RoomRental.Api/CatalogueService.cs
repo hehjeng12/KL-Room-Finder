@@ -22,15 +22,24 @@ public sealed partial class CatalogueService
     private readonly object _gate = new();
     private Snapshot? _snapshot;
 
+    // The root being scanned and the prefix that keeps its media ids distinct; only set inside Build().
+    private string _scanRoot = "";
+    private string _scanKeyPrefix = "";
+
     public CatalogueService(IOptions<MediaOptions> options, IWebHostEnvironment env, ILogger<CatalogueService> logger)
     {
         _options = options.Value;
         _logger = logger;
-        RootPath = Path.GetFullPath(Path.Combine(env.ContentRootPath, _options.RootPath));
+        RootPaths = new[] { _options.RootPath }.Concat(_options.ExtraRootPaths)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => Path.GetFullPath(Path.Combine(env.ContentRootPath, p)))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
         ListingsPath = Path.GetFullPath(Path.Combine(env.ContentRootPath, _options.ListingsPath));
     }
 
-    public string RootPath { get; }
+    public IReadOnlyList<string> RootPaths { get; }
+    public string RootPath => RootPaths[0];
     public string ListingsPath { get; }
 
     public Catalogue GetCatalogue() => GetSnapshot().Catalogue;
@@ -54,29 +63,66 @@ public sealed partial class CatalogueService
     {
         var listings = LoadListings();
         var mediaPaths = new Dictionary<string, string>(StringComparer.Ordinal);
-        var properties = new List<Property>();
-
-        if (!Directory.Exists(RootPath))
-        {
-            _logger.LogError("Media root {RootPath} does not exist", RootPath);
-            return new Snapshot(new Catalogue(DateTimeOffset.UtcNow, properties), mediaPaths);
-        }
-
+        var byFolder = new Dictionary<string, Property>(StringComparer.OrdinalIgnoreCase);
         var excluded = new HashSet<string>(_options.ExcludedFolders, StringComparer.OrdinalIgnoreCase);
-        foreach (var propertyDir in SortedDirectories(RootPath))
+
+        for (var i = 0; i < RootPaths.Count; i++)
         {
-            var folderName = propertyDir.Name;
-            if (excluded.Contains(folderName) || folderName.StartsWith('.')) continue;
+            _scanRoot = RootPaths[i];
+            // The first root keeps unprefixed ids so existing thumbnails and links stay the same.
+            _scanKeyPrefix = i == 0 ? "" : $"{Path.GetFileName(_scanRoot)}:";
+            if (!Directory.Exists(_scanRoot))
+            {
+                _logger.LogError("Media root {RootPath} does not exist", _scanRoot);
+                continue;
+            }
 
-            listings.Properties.TryGetValue(folderName, out var listing);
-            if (listing?.Hidden == true) continue;
+            foreach (var propertyDir in SortedDirectories(_scanRoot))
+            {
+                var folderName = propertyDir.Name;
+                if (excluded.Contains(folderName) || folderName.StartsWith('.')) continue;
 
-            var property = BuildProperty(propertyDir, listing, listings, mediaPaths);
-            if (property is not null) properties.Add(property);
+                listings.Properties.TryGetValue(folderName, out var listing);
+                if (listing?.Hidden == true) continue;
+
+                var property = BuildProperty(propertyDir, listing, listings, mediaPaths);
+                if (property is null) continue;
+                byFolder[folderName] = byFolder.TryGetValue(folderName, out var existing) ? Merge(existing, property, listing) : property;
+            }
         }
 
-        _logger.LogInformation("Catalogue built: {Properties} properties, {Media} media files", properties.Count, mediaPaths.Count);
+        var properties = byFolder.Values.OrderBy(p => p.FolderName, NaturalComparer.Instance).ToList();
+        _logger.LogInformation("Catalogue built from {Roots} folder(s): {Properties} properties, {Media} media files",
+            RootPaths.Count, properties.Count, mediaPaths.Count);
         return new Snapshot(new Catalogue(DateTimeOffset.UtcNow, properties), mediaPaths);
+    }
+
+    /// <summary>Combines the same property found in two media folders: matching units and rooms are joined.</summary>
+    private static Property Merge(Property a, Property b, PropertyListing? listing)
+    {
+        var units = a.Units.ToList();
+        foreach (var unit in b.Units)
+        {
+            var index = units.FindIndex(u => u.Id == unit.Id);
+            if (index < 0)
+            {
+                units.Add(unit);
+                continue;
+            }
+
+            var rooms = units[index].Rooms.ToList();
+            foreach (var room in unit.Rooms)
+            {
+                var r = rooms.FindIndex(x => x.Id == room.Id);
+                if (r < 0) rooms.Add(room);
+                else rooms[r] = rooms[r] with { Media = rooms[r].Media.Concat(room.Media).ToList() };
+            }
+            units[index] = units[index] with { SharedMedia = units[index].SharedMedia.Concat(unit.SharedMedia).ToList(), Rooms = SortRooms(rooms) };
+        }
+
+        // The unnamed unit (properties without unit folders) stays first, then units in name order.
+        units = units.OrderBy(u => u.Name.Length == 0 ? 0 : 1).ThenBy(u => u.Name, NaturalComparer.Instance).ToList();
+        return a with { Units = units, PriceFrom = listing?.PriceFrom ?? MinPrice(units), CoverMediaId = a.CoverMediaId ?? b.CoverMediaId };
     }
 
     private Property? BuildProperty(DirectoryInfo dir, PropertyListing? listing, Listings listings, Dictionary<string, string> mediaPaths)
@@ -189,12 +235,16 @@ public sealed partial class CatalogueService
     private List<MediaItem> CollectMedia(DirectoryInfo dir, Dictionary<string, string> mediaPaths)
     {
         var items = new List<MediaItem>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var file in dir.EnumerateFiles().OrderBy(f => f.Name, NaturalComparer.Instance))
         {
             var kind = PhotoExtensions.Contains(file.Extension) ? "photo" : VideoExtensions.Contains(file.Extension) ? "video" : null;
             if (kind is null) continue;
 
-            var id = MediaId(RelativeKey(file.FullName));
+            // Skip exact copies in the same folder, such as "photo.jpg" and "photo(1).jpg" from a Drive download.
+            if (!seen.Add(ContentFingerprint(file))) continue;
+
+            var id = MediaId(_scanKeyPrefix + RelativeKey(file.FullName));
             mediaPaths[id] = file.FullName;
             items.Add(new MediaItem(id, kind, file.Name, file.Length));
         }
@@ -230,7 +280,16 @@ public sealed partial class CatalogueService
         }
     }
 
-    private string RelativeKey(string fullPath) => Path.GetRelativePath(RootPath, fullPath).Replace('\\', '/');
+    private string RelativeKey(string fullPath) => Path.GetRelativePath(_scanRoot, fullPath).Replace('\\', '/');
+
+    /// <summary>File size plus a hash of the first 64 KB: cheap, and enough to spot duplicate copies.</summary>
+    private static string ContentFingerprint(FileInfo file)
+    {
+        using var stream = file.OpenRead();
+        var buffer = new byte[Math.Min(65536, file.Length)];
+        stream.ReadExactly(buffer);
+        return $"{file.Length}:{Convert.ToHexString(SHA1.HashData(buffer))}";
+    }
 
     private static IEnumerable<DirectoryInfo> SortedDirectories(string path) =>
         new DirectoryInfo(path).EnumerateDirectories().OrderBy(d => d.Name, NaturalComparer.Instance);
@@ -295,7 +354,8 @@ public sealed partial class CatalogueService
 
     private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    [GeneratedRegex(@"^([A-Za-z]\d?-)?\d{1,3}[A-Za-z]?-\d{1,3}[A-Za-z]?\b")]
+    // A-11-07, 09-03, D3-26-08, T2-37-05, and with a block name in front: "PV16 13-17".
+    [GeneratedRegex(@"^([A-Za-z]+\d*\s+)?([A-Za-z]\d?-)?\d{1,3}[A-Za-z]?-\d{1,3}[A-Za-z]?\b")]
     private static partial Regex UnitRegex();
 
     [GeneratedRegex(@"\s*\((\d+)\s*rooms?\)", RegexOptions.IgnoreCase)]
