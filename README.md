@@ -1,6 +1,6 @@
 # KL Room Finder
 
-A room rental listing website for Kuala Lumpur, built for a part-time room rental role. Prospective tenants browse real photos and video tours of 226 rooms across 24 properties, then enquire through WhatsApp, Instagram or rednote (小红书). Each enquiry is pre-filled with the room they were viewing.
+A room rental listing website for Kuala Lumpur, built for a part-time room rental role. Prospective tenants browse real photos and video tours of 375 rooms across 31 properties, then enquire through WhatsApp, Instagram or rednote (小红书). Each enquiry is pre-filled with the room they were viewing.
 
 **Live site:** https://kl-room-finder.pages.dev
 
@@ -14,7 +14,7 @@ A room rental listing website for Kuala Lumpur, built for a part-time room renta
 
 ## Key features
 
-- **Folders as the database:** the C# backend scans a `Property / Unit / Room` folder tree of photos and videos and builds the catalogue automatically, including room-type classification (Master, Middle, Single, Balcony, Partition…).
+- **Folders as the database:** the C# backend scans a `Property / Unit / Room` folder tree of photos and videos and builds the catalogue automatically, including room-type classification (Master, Middle, Single, Balcony, Partition…). New batches can live in separate folders that are merged into one catalogue, and duplicate file copies are filtered out.
 - **Image pipeline:** multi-megabyte phone photos are resized to 480 / 960 / 1600 px JPEGs, with EXIF orientation applied, and cached.
 - **Browsing:** search, filters (room type, property, has video, hide taken), a gallery and full-screen lightbox with keyboard and swipe support, and shareable links for each room.
 - **Contact:** WhatsApp and Messenger links with a pre-filled enquiry message, and a rednote QR card (rednote doesn't support pre-filled messages).
