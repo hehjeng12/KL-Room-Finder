@@ -56,6 +56,7 @@ export interface SiteInfo {
   rednoteUrl: string;
   rednoteQrImage: string;
   copyrightText: string;
+  enquiryTemplate: string;
   currency: string;
 }
 
@@ -82,16 +83,22 @@ export function formatPrice(price: number | null, currency: string) {
 
 // ---- Contact links ------------------------------------------------------
 
+/** The enquiry as sent: what the visitor was viewing, then the details form from appsettings (EnquiryTemplate). */
+export function fullEnquiry(site: SiteInfo, message: string) {
+  const template = site.enquiryTemplate?.trim();
+  return template ? `${message}\n\n${template}` : message;
+}
+
 export function whatsAppLink(site: SiteInfo, message: string) {
   const number = site.whatsAppNumber.replace(/\D/g, '');
   if (!number) return null;
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${number}?text=${encodeURIComponent(fullEnquiry(site, message))}`;
 }
 
 export function messengerLink(site: SiteInfo, message: string) {
   const user = site.messengerUsername.trim();
   if (!user) return null;
-  return `https://m.me/${encodeURIComponent(user)}?text=${encodeURIComponent(message)}`;
+  return `https://m.me/${encodeURIComponent(user)}?text=${encodeURIComponent(fullEnquiry(site, message))}`;
 }
 
 export function instagramLink(site: SiteInfo) {

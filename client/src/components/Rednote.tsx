@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { hasRednote } from '../api';
+import { fullEnquiry, hasRednote } from '../api';
 import { useData } from '../data';
 import { CloseIcon } from './Icons';
 
@@ -61,7 +61,7 @@ function RednoteDialog({ message, onClose }: { message: string; onClose: () => v
           {site.rednoteUrl && (
             <a className="btn btn-rednote" href={site.rednoteUrl} target="_blank" rel="noopener noreferrer">Open my profile</a>
           )}
-          <button className="btn btn-outline" onClick={() => copy(message, 'message')}>
+          <button className="btn btn-outline" onClick={() => copy(fullEnquiry(site, message), 'message')}>
             {copied === 'message' ? 'Message copied!' : 'Copy enquiry message'}
           </button>
         </div>

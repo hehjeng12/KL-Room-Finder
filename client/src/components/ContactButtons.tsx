@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { hasAnyContact, instagramLink, messengerLink, whatsAppLink } from '../api';
+import { fullEnquiry, hasAnyContact, instagramLink, messengerLink, whatsAppLink } from '../api';
 import { useData } from '../data';
 import { FacebookIcon, InstagramIcon, MessengerIcon, WhatsAppIcon } from './Icons';
 import { RednoteButton } from './Rednote';
@@ -25,7 +25,7 @@ export function ContactButtons({ message, layout = 'stack' }: Props) {
   // Instagram DMs can't be pre-filled, so copy the enquiry for the visitor to paste.
   const openInstagram = async () => {
     try {
-      await navigator.clipboard.writeText(message);
+      await navigator.clipboard.writeText(fullEnquiry(site, message));
       setCopied(true);
       setTimeout(() => setCopied(false), 4000);
     } catch {

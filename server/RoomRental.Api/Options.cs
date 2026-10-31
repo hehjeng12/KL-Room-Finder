@@ -31,6 +31,9 @@ public sealed class SiteOptions
     /// <summary>Text shown after "© {year}" in the footer. Falls back to the brand name.</summary>
     public string CopyrightText { get; set; } = "";
 
+    /// <summary>Details form added under every enquiry message (WhatsApp, Messenger, copied text). Empty = none.</summary>
+    public string EnquiryTemplate { get; set; } = "";
+
     public string Currency { get; set; } = "RM";
 }
 
