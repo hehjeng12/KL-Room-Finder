@@ -92,7 +92,8 @@ export function fullEnquiry(site: SiteInfo, message: string) {
 export function whatsAppLink(site: SiteInfo, message: string) {
   const number = site.whatsAppNumber.replace(/\D/g, '');
   if (!number) return null;
-  return `https://wa.me/${number}?text=${encodeURIComponent(fullEnquiry(site, message))}`;
+  // Not wa.me: its redirect replaces every emoji in the text with "�".
+  return `https://api.whatsapp.com/send/?phone=${number}&text=${encodeURIComponent(fullEnquiry(site, message))}`;
 }
 
 export function messengerLink(site: SiteInfo, message: string) {
