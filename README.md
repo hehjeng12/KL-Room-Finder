@@ -16,13 +16,15 @@ A room rental listing website for Kuala Lumpur, built for a part-time room renta
 
 - **Folders as the database:** the C# backend scans a `Property / Unit / Room` folder tree of photos and videos and builds the catalogue automatically, including room-type classification (Master, Middle, Single, Balcony, Partition…). New batches can live in separate folders that are merged into one catalogue, and duplicate file copies are filtered out.
 - **Image pipeline:** multi-megabyte phone photos are resized to 480 / 960 / 1600 px JPEGs, with EXIF orientation applied, and cached.
-- **Browsing:** search, filters (room type, property, has video, hide taken), a gallery and full-screen lightbox with keyboard and swipe support, and shareable links for each room.
-- **Contact:** WhatsApp and Messenger links with a pre-filled enquiry message, and a rednote QR card (rednote doesn't support pre-filled messages).
+- **Browsing:** search, filters (area, room type, property, has video, hide taken), a gallery and full-screen lightbox with keyboard and swipe support, and shareable links for each room and each area.
+- **Saved-rooms shortlist:** visitors save up to 10 rooms (kept in their own browser) and ask about all of them in one WhatsApp message.
+- **Contact:** WhatsApp and Messenger links with a pre-filled enquiry message (the room or rooms, plus a short details form), and a rednote QR card (rednote doesn't support pre-filled messages).
 
 ## Engineering decisions
 
 - **Static export for free hosting:** the same C# project can run as a live API, or export the whole site as static files (`dotnet run -- export`). That lets about 1 GB of media be hosted on Cloudflare Pages' free plan with no server to pay for.
 - **Video seeking on a static host:** Cloudflare Pages ignores HTTP `Range` requests, which stopped browsers seeking in videos and can stop Safari on iPhone playing them at all. A small Pages Function (`functions/v/[file].js`) returns `206 Partial Content` for video requests only, so photos don't use the free function quota.
+- **Two-phase enquiries:** the site is for browsing. Price, male/female unit and availability change daily in a shared agents' sheet, so they are confirmed on WhatsApp rather than published, and every room page says so.
 - **Configuration out of source:** personal contact details live in a git-ignored `appsettings.Local.json`, and prices and availability live in `listings.json`, so non-developers can update them without touching code.
 
 ---
@@ -40,14 +42,15 @@ House Renting Information/          ← your photos & videos (the backend reads 
     │   ├── appsettings.Local.json  ← your contact details (private, not in git)
     │   └── Data/listings.json      ← prices, availability, property info
     ├── functions/v/[file].js       ← Cloudflare function that lets videos seek / play on iPhone
-    ├── publish-static.ps1          ← build + publish to Cloudflare in one command
+    ├── publish.cmd                 ← build + publish to Cloudflare in one command (use this one)
+    ├── publish-static.ps1          ← same, for PCs that allow unsigned PowerShell scripts
     └── deploy/                     ← generated files that get uploaded (don't edit by hand)
 ```
 
 ## How it works
 
 - **The folders are the database.** The API scans the folder: `Property / Unit / Room / files`. Folders named like a unit number (`A-11-07`, `09-03`, `D3-26-08`) become units. Folders with "Common" or "Toilet" in their name become the unit's shared spaces. Everything else becomes a rentable room. If a property has no unit folders (D_Quince, Nest 2, PJS7, …), its rooms are grouped into a single unit.
-- To add a listing, drop a new folder in. To remove one, delete or move its folder. For the **live site**, then run `.\publish-static.ps1 -Deploy` (see below). When running locally with the C# server, changes show up within 30 seconds.
+- To add a listing, drop a new folder in. To remove one, delete or move its folder. For the **live site**, then run `.\publish.cmd deploy` (see below). When running locally with the C# server, changes show up within 30 seconds.
 - Phone photos (several MB each) are resized to web-sized JPEGs on first view and cached in `App_Data/thumbs`. Videos are streamed with range requests, so visitors can seek without downloading the whole file.
 - Room types (Master, Middle, Single, Balcony, Partition, Studio…) are worked out from the folder name. They drive the filters.
 
@@ -75,6 +78,8 @@ Your real contact details go in `appsettings.Local.json`. It's git-ignored, so i
 The rednote QR image (`client/public/rednote-qr.png`) is git-ignored for the same reason. Keep a copy of both files somewhere safe: a fresh clone of the repository won't have them.
 
 Brand name, tagline and copyright text stay in the public `appsettings.json`.
+
+**Enquiry form.** `EnquiryTemplate` in `appsettings.json` is the short form added under every enquiry (WhatsApp, Messenger, and the copied Instagram and rednote message). Edit the text, keeping `\n` for each new line, then publish. Ask for anything more sensitive, such as race, nationality or occupation, later on WhatsApp rather than in the first message.
 
 **Extra media folders.** New batches of rooms can live in their own folder, with the same `Property / Unit / Room` layout, instead of being copied into the main one. List them in `appsettings.Local.json`:
 
@@ -115,6 +120,7 @@ Every property already has an entry. Fill in whatever you have:
 - `status`: `available`, `reserved` or `taken`. Taken rooms stay visible but greyed out, and visitors can hide them with a filter.
 - Rooms without a price show **"Contact for price"**, which is also a good prompt for people to message you.
 - `"hidden": true` removes a property from the site without deleting its folder.
+- `area`: shown on cards and pages, and used by the area filters. Write it as "Area, City", for example `"Bukit Jalil, Kuala Lumpur"`. The area buttons show the part before the comma. All 31 properties have one, researched from PropertyGuru.
 
 ## Running it locally
 
@@ -153,19 +159,14 @@ The free plan needs no credit card and has no bandwidth charges. In free mode th
 
 ```powershell
 cd "C:\House Renting Information\website"
-.\publish-static.ps1 -Deploy
+.\publish.cmd deploy
 ```
 
-The live site is **https://kl-room-finder.pages.dev**. Later runs upload only changed files.
+The live site is **https://kl-room-finder.pages.dev**. Later runs upload only changed files. `.\publish.cmd` without `deploy` builds without uploading. On a PC that allows unsigned PowerShell scripts, `.\publish-static.ps1 -Deploy` does the same.
 
-If PowerShell refuses to run the script because it isn't signed (`...is not digitally signed`), use the batch-file version instead. It does the same steps, and PowerShell's signing rule doesn't apply to `.cmd` files:
+**Visitor numbers (optional, free):** in the Cloudflare dashboard, go to **Workers & Pages → kl-room-finder → Metrics** and enable **Web Analytics**, then publish once. It shows visits, top pages and where visitors came from, and it uses no cookies.
 
-```powershell
-cd "C:\House Renting Information\website"
-.\publish.cmd deploy        # or .\publish.cmd to build only
-```
-
-Or run the same steps by hand:
+Why `publish.cmd` and not `publish-static.ps1`: this PC only runs signed PowerShell scripts (`...is not digitally signed`), and that rule doesn't apply to `.cmd` files. Both do the same steps. To run the steps by hand instead:
 
 ```powershell
 cd "C:\House Renting Information\website\client"
