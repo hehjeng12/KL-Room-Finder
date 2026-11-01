@@ -41,7 +41,7 @@ export function PropertiesPage() {
         <div className="chips" role="group" aria-label="Area">
           <button className={!area ? 'chip active' : 'chip'} onClick={() => update('area', '')}>All areas</button>
           {areas.map((a) => (
-            <button key={a} className={area === a ? 'chip active' : 'chip'} onClick={() => update('area', a)}>{a}</button>
+            <button key={a} className={area === a ? 'chip active' : 'chip'} onClick={() => update('area', a)} title={a}>{a.split(',')[0]}</button>
           ))}
         </div>
       )}

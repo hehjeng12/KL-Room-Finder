@@ -2,7 +2,7 @@
   "properties": {
     "Ava Kepong": {
       "displayName": "Ava Kepong",
-      "area": "Kepong",
+      "area": "Kepong, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -11,7 +11,7 @@
     },
     "Berlian": {
       "displayName": "Berlian",
-      "area": "Setapak",
+      "area": "Setapak, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -20,7 +20,7 @@
     },
     "Bliss": {
       "displayName": "Bliss",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -29,7 +29,7 @@
     },
     "D_Quince": {
       "displayName": "D'Quince",
-      "area": "Petaling Jaya",
+      "area": "Damansara Perdana, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -38,7 +38,7 @@
     },
     "D_Terra": {
       "displayName": "D'Terra",
-      "area": "Petaling Jaya",
+      "area": "Damansara Perdana, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -47,7 +47,7 @@
     },
     "D‘Clover": {
       "displayName": "D'Clover",
-      "area": "Petaling Jaya",
+      "area": "Damansara Perdana, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -56,7 +56,7 @@
     },
     "D’Erica": {
       "displayName": "D'Erica",
-      "area": "",
+      "area": "Damansara Perdana, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -65,7 +65,7 @@
     },
     "Homesphere Utro": {
       "displayName": "Utropolis Suites 1",
-      "area": "Shah Alam / Glenmarie",
+      "area": "Glenmarie, Shah Alam, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -74,7 +74,7 @@
     },
     "M Luna": {
       "displayName": "M Luna",
-      "area": "Kepong",
+      "area": "Kepong, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -83,7 +83,7 @@
     },
     "Nadayu": {
       "displayName": "Nadayu",
-      "area": "Shah Alam / Glenmarie",
+      "area": "Shah Alam, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -92,7 +92,7 @@
     },
     "Nest 2": {
       "displayName": "Nest 2",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -101,7 +101,7 @@
     },
     "PJS7": {
       "displayName": "PJS7",
-      "area": "Bandar Sunway",
+      "area": "Sunway, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -110,7 +110,7 @@
     },
     "PV13": {
       "displayName": "PV13",
-      "area": "Setapak",
+      "area": "Setapak, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -119,7 +119,7 @@
     },
     "PV15": {
       "displayName": "PV15",
-      "area": "Setapak",
+      "area": "Setapak, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -128,7 +128,7 @@
     },
     "Petalz Residence": {
       "displayName": "Petalz Residence",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -137,7 +137,7 @@
     },
     "Platinum Arena": {
       "displayName": "Platinum Arena",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -146,7 +146,7 @@
     },
     "Razak City": {
       "displayName": "Razak City",
-      "area": "Pudu / Kuala Lumpur",
+      "area": "Salak South, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -155,7 +155,7 @@
     },
     "Riamas": {
       "displayName": "Riamas",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -164,7 +164,7 @@
     },
     "Skyline Pudu": {
       "displayName": "Skyline Pudu",
-      "area": "Pudu / Kuala Lumpur",
+      "area": "Pudu, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -173,7 +173,7 @@
     },
     "Sunway Belfield (Actual)": {
       "displayName": "Sunway Belfield",
-      "area": "Pudu / Kuala Lumpur",
+      "area": "KL City Centre, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -182,7 +182,7 @@
     },
     "Sunway Dhill": {
       "displayName": "Sunway Dhill",
-      "area": "",
+      "area": "Kota Damansara, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -191,7 +191,7 @@
     },
     "The Arcuz": {
       "displayName": "The Arcuz",
-      "area": "",
+      "area": "Kelana Jaya, Petaling Jaya, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -200,7 +200,7 @@
     },
     "The Era": {
       "displayName": "The Era",
-      "area": "Kepong",
+      "area": "Segambut, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -209,7 +209,7 @@
     },
     "Tuan 2egacy": {
       "displayName": "Tuan 2egacy",
-      "area": "Kepong",
+      "area": "Segambut, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -218,7 +218,7 @@
     },
     "Vierra": {
       "displayName": "Vierra",
-      "area": "Bukit Jalil / Kinrara / Puchong",
+      "area": "Bukit Jalil, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -227,7 +227,7 @@
     },
     "D Vervain": {
       "displayName": "D'Vervain",
-      "area": "",
+      "area": "Damansara Perdana, Selangor",
       "address": "",
       "description": "",
       "highlights": [],
@@ -236,7 +236,7 @@
     },
     "Divo": {
       "displayName": "Divo",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -245,7 +245,7 @@
     },
     "Harmony": {
       "displayName": "Harmony",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -254,7 +254,7 @@
     },
     "Minest Residence B-38-10": {
       "displayName": "Minest Residence",
-      "area": "Kepong",
+      "area": "Sentul, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -263,7 +263,7 @@
     },
     "PV16": {
       "displayName": "PV16",
-      "area": "Setapak",
+      "area": "Setapak, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -272,7 +272,7 @@
     },
     "Residensi Bintang": {
       "displayName": "Residensi Bintang",
-      "area": "Bukit Jalil / Kinrara / Puchong",
+      "area": "Bukit Jalil, Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
@@ -281,7 +281,7 @@
     },
     "Tiara Mutiara 1": {
       "displayName": "Tiara Mutiara 1",
-      "area": "Old Klang Road / OUG",
+      "area": "Jalan Klang Lama (Old Klang Road), Kuala Lumpur",
       "address": "",
       "description": "",
       "highlights": [],
