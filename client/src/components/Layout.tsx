@@ -2,7 +2,8 @@ import { useEffect, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { hasAnyContact, instagramProfile, whatsAppLink } from '../api';
 import { enquiryMessage, useData } from '../data';
-import { FacebookIcon, HomeIcon, InstagramIcon, WhatsAppIcon } from './Icons';
+import { shortlistMessage, useShortlist } from '../shortlist';
+import { FacebookIcon, HeartIcon, HomeIcon, InstagramIcon, WhatsAppIcon } from './Icons';
 import { RednoteButton } from './Rednote';
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -23,8 +24,22 @@ export function Layout({ children }: { children: ReactNode }) {
       <Header />
       <main>{children}</main>
       <Footer />
+      <ShortlistBar />
       <FloatingWhatsApp />
     </>
+  );
+}
+
+/** Reminds visitors with saved rooms that they can ask about them all at once. */
+function ShortlistBar() {
+  const { entries } = useShortlist();
+  const { pathname } = useLocation();
+  if (entries.length === 0 || pathname === '/shortlist') return null;
+  return (
+    <div className="shortlist-bar" role="status">
+      <span><HeartIcon size={16} filled /> {entries.length} saved</span>
+      <Link to="/shortlist" className="btn btn-whatsapp btn-sm">Enquire together</Link>
+    </div>
   );
 }
 
@@ -41,6 +56,7 @@ function Header() {
         <nav>
           <NavLink to="/rooms">Rooms</NavLink>
           <NavLink to="/properties">Properties</NavLink>
+          <SavedLink />
           {wa && (
             <a className="btn btn-whatsapp btn-sm" href={wa} target="_blank" rel="noopener noreferrer">
               <WhatsAppIcon size={18} /> <span className="hide-sm">WhatsApp</span>
@@ -89,14 +105,29 @@ function Footer() {
   );
 }
 
-/** Always-visible chat bubble. On room pages the message names the room being viewed. */
+function SavedLink() {
+  const { entries } = useShortlist();
+  return (
+    <NavLink to="/shortlist" className="nav-saved" aria-label={`Saved rooms (${entries.length})`}>
+      <HeartIcon size={18} filled={entries.length > 0} />
+      <span className="hide-sm">Saved</span>
+      {entries.length > 0 && <span className="count">{entries.length}</span>}
+    </NavLink>
+  );
+}
+
+/** Always-visible chat bubble. On room pages the message names the room; on the saved page, every saved room. */
 function FloatingWhatsApp() {
   const { site, findRoom, findProperty } = useData();
+  const { entries } = useShortlist();
   const { pathname } = useLocation();
   const [, kind, id] = pathname.split('/');
   const entry = kind === 'r' && id ? findRoom(id) ?? null : null;
   const property = kind === 'p' && id ? findProperty(id) ?? null : null;
-  const href = whatsAppLink(site, enquiryMessage(entry, property, location.href));
+  const message = kind === 'shortlist' && entries.length > 0
+    ? shortlistMessage(entries, location.origin)
+    : enquiryMessage(entry, property, location.href);
+  const href = whatsAppLink(site, message);
   if (!href) return null;
   return (
     <a className="floating-wa" href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">

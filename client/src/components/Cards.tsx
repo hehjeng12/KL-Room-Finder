@@ -3,6 +3,7 @@ import { formatPrice, type Property } from '../api';
 import { countMedia, roomCover, unitLabel, useData, type RoomEntry } from '../data';
 import { CameraIcon, PinIcon, VideoIcon } from './Icons';
 import { MediaThumb } from './Media';
+import { SaveButton } from './SaveButton';
 
 export function StatusBadge({ status }: { status: string | null }) {
   if (!status) return null;
@@ -23,6 +24,7 @@ export function RoomCard({ entry, showProperty = true }: { entry: RoomEntry; sho
         <MediaThumb item={roomCover(room)} alt={room.name} />
         <span className="type-badge">{room.type}</span>
         <StatusBadge status={room.status} />
+        <SaveButton roomId={room.id} />
       </div>
       <div className="card-body">
         {showProperty && <p className="eyebrow">{unitLabel(property, unit)}</p>}
@@ -37,7 +39,6 @@ export function RoomCard({ entry, showProperty = true }: { entry: RoomEntry; sho
     </Link>
   );
 }
-
 
 export function PropertyCard({ property }: { property: Property }) {
   const { site } = useData();

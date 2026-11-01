@@ -5,6 +5,7 @@ import { RoomCard, StatusBadge } from '../components/Cards';
 import { ContactButtons } from '../components/ContactButtons';
 import { LinkIcon } from '../components/Icons';
 import { Gallery, MediaGrid } from '../components/Media';
+import { SaveButton } from '../components/SaveButton';
 import { countMedia, enquiryMessage, unitLabel, useData, useDocumentTitle } from '../data';
 import { ROOM_TYPES } from './roomTypes';
 import { NotFoundPage } from './NotFoundPage';
@@ -67,7 +68,9 @@ export function RoomPage() {
             {videos > 0 && <li>{videos} video tour{videos === 1 ? '' : 's'}</li>}
             {unit.sharedMedia.length > 0 && <li>Shared spaces shown below</li>}
           </ul>
+          <p className="confirm-note">Rooms change quickly. Price, male/female unit and availability are confirmed on WhatsApp.</p>
           <ContactButtons message={enquiryMessage(entry, null, location.href)} />
+          <SaveButton roomId={room.id} variant="button" />
           <button className="btn btn-ghost share" onClick={share}><LinkIcon size={18} /> {copied ? 'Link copied!' : 'Share this room'}</button>
         </aside>
       </div>

@@ -111,7 +111,12 @@ code { background: rgba(0, 0, 0, 0.08); padding: 0.1em 0.35em; border-radius: 4p
 @media (max-width: 420px) {
   .brand { font-size: 0.95rem; gap: 8px; }
   .brand-mark { width: 30px; height: 30px; }
-  .site-header nav a:not(.btn) { padding: 8px 6px; font-size: 0.88rem; }
+  .site-header nav a:not(.btn) { padding: 8px 5px; font-size: 0.86rem; }
+  .site-header nav { gap: 0; }
+  .header-inner { gap: 8px; }
+  .nav-saved { gap: 4px; }
+  /* The floating WhatsApp bubble is always on screen, so the header button can go on small phones. */
+  .site-header nav .btn-whatsapp { display: none; }
 }
 
 .site-footer { background: var(--brand-700); color: #fff; margin-top: 48px; padding-top: 48px; }
@@ -312,6 +317,37 @@ code { background: rgba(0, 0, 0, 0.08); padding: 0.1em 0.35em; border-radius: 4p
 .facts { list-style: none; padding: 0; margin: 4px 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .facts li { padding: 4px 10px; border-radius: 999px; background: var(--bg); font-size: 0.83rem; font-weight: 600; color: var(--muted); }
 .share { margin-top: 4px; }
+.confirm-note { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; border-left: 3px solid var(--accent); background: rgba(246, 196, 83, 0.14); font-size: 0.88rem; color: var(--ink); }
+
+/* ---------- Shortlist ---------- */
+.save-btn {
+  position: absolute; right: 10px; bottom: 10px; z-index: 1;
+  display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  background: rgba(255, 255, 255, 0.94); color: var(--muted); box-shadow: var(--shadow);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.save-btn:hover { transform: scale(1.08); color: #e0245e; }
+.save-btn.saved { color: #e0245e; }
+.save-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-save { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.btn-save.saved { border-color: #e0245e; color: #e0245e; }
+.nav-saved { display: inline-flex; align-items: center; gap: 6px; }
+.nav-saved .count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #e0245e; color: #fff; font-size: 0.75rem; font-weight: 700; display: inline-grid; place-items: center; }
+.shortlist-bar {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 45;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px;
+  background: var(--brand-700); color: #fff; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 0.93rem; white-space: nowrap;
+}
+.shortlist-bar .btn { padding: 8px 16px; }
+@media (max-width: 520px) { .shortlist-bar { left: 16px; right: 90px; transform: none; justify-content: space-between; } }
+.shortlist-layout { display: grid; gap: 28px; align-items: start; }
+@media (min-width: 960px) { .shortlist-layout { grid-template-columns: 1fr 340px; } }
+.shortlist-item { position: relative; }
+.shortlist-item .remove {
+  position: absolute; top: 10px; right: 10px; z-index: 2; border: 0; border-radius: 999px; padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.65); color: #fff; font-size: 0.8rem; font-weight: 600;
+}
+.preview-message { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 0.82rem; max-height: 220px; overflow: auto; margin: 4px 0 8px; }
 
 /* ---------- Gallery & lightbox ---------- */
 .gallery { min-width: 0; }
