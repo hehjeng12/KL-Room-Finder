@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RoomCard } from '../components/Cards';
 import { SearchIcon } from '../components/Icons';
-import { unitLabel, useData, useDocumentTitle } from '../data';
+import { areaList, unitLabel, useData, useDocumentTitle } from '../data';
 import { ROOM_TYPES } from './roomTypes';
 
 type Sort = 'default' | 'price' | 'media';
@@ -14,6 +14,7 @@ export function RoomsPage() {
 
   const q = params.get('q') ?? '';
   const type = params.get('type') ?? '';
+  const area = params.get('area') ?? '';
   const property = params.get('property') ?? '';
   const videoOnly = params.get('video') === '1';
   const hideTaken = params.get('available') === '1';
@@ -28,11 +29,13 @@ export function RoomsPage() {
 
   const types = ROOM_TYPES.filter((t) => rooms.some((r) => r.room.type === t.type));
   const hasPrices = rooms.some((r) => r.room.price != null);
+  const areas = areaList(catalogue.properties);
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const list = rooms.filter((r) => {
       if (type && r.room.type !== type) return false;
+      if (area && r.property.area !== area) return false;
       if (property && r.property.id !== property) return false;
       if (videoOnly && !r.room.media.some((m) => m.kind === 'video')) return false;
       if (hideTaken && r.room.status?.toLowerCase() === 'taken') return false;
@@ -45,9 +48,9 @@ export function RoomsPage() {
     if (sort === 'price') list.sort((a, b) => (a.room.price ?? Infinity) - (b.room.price ?? Infinity));
     if (sort === 'media') list.sort((a, b) => b.room.media.length - a.room.media.length);
     return list;
-  }, [rooms, q, type, property, videoOnly, hideTaken, sort]);
+  }, [rooms, q, type, area, property, videoOnly, hideTaken, sort]);
 
-  const filtered = Boolean(q || type || property || videoOnly || hideTaken);
+  const filtered = Boolean(q || type || area || property || videoOnly || hideTaken);
 
   return (
     <div className="container page">
@@ -61,9 +64,15 @@ export function RoomsPage() {
           <SearchIcon />
           <input value={q} onChange={(e) => update('q', e.target.value)} placeholder="Search property, unit or room" aria-label="Search rooms" />
         </label>
+        {areas.length > 0 && (
+          <select value={area} onChange={(e) => { const next = new URLSearchParams(params); if (e.target.value) next.set('area', e.target.value); else next.delete('area'); next.delete('property'); setParams(next, { replace: true }); }} aria-label="Area">
+            <option value="">All areas</option>
+            {areas.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+        )}
         <select value={property} onChange={(e) => update('property', e.target.value)} aria-label="Property">
           <option value="">All properties</option>
-          {catalogue.properties.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          {catalogue.properties.filter((p) => !area || p.area === area).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <select value={sort} onChange={(e) => update('sort', e.target.value === 'default' ? '' : e.target.value)} aria-label="Sort">
           <option value="default">Sort: by property</option>

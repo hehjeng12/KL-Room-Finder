@@ -77,6 +77,10 @@ export function useData() {
 
 export const unitLabel = (property: Property, unit: Unit) => (unit.name ? `${property.name} · ${unit.name}` : property.name);
 
+/** Distinct property areas, alphabetically, for the area filters. */
+export const areaList = (properties: Property[]) =>
+  [...new Set(properties.map((p) => p.area).filter((a): a is string => Boolean(a)))].sort((a, b) => a.localeCompare(b));
+
 export const roomCover = (room: Room) => room.media.find((m) => m.kind === 'photo') ?? room.media[0];
 
 export const countMedia = (items: { kind: string }[]) => ({
