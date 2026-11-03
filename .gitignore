@@ -490,3 +490,6 @@ client/public/rednote-qr.png
 
 # Private room code -> unit lookup written by the export
 room-codes.csv
+
+# Marketing images (large, generated)
+marketing/
