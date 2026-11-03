@@ -33,7 +33,7 @@ The rest of this README is the operating guide: how to update listings and publi
 
 ```
 House Renting Information/          ← your photos & videos (the backend reads these directly)
-├── Vierra/B-11-15/Master Room 1/…
+├── Vierra/B-10-05/Master Room 1/…   (example names)
 ├── …
 └── website/
     ├── client/                     ← FRONTEND: React + TypeScript (Vite)
@@ -49,7 +49,7 @@ House Renting Information/          ← your photos & videos (the backend reads 
 
 ## How it works
 
-- **The folders are the database.** The API scans the folder: `Property / Unit / Room / files`. Folders named like a unit number (`A-11-07`, `09-03`, `D3-26-08`) become units. Folders with "Common" or "Toilet" in their name become the unit's shared spaces. Everything else becomes a rentable room. If a property has no unit folders (D_Quince, Nest 2, PJS7, …), its rooms are grouped into a single unit.
+- **The folders are the database.** The API scans the folder: `Property / Unit / Room / files`. Folders named like a unit number (for example `A-12-03`, `08-05`, `C2-15-07`) become units. Folders with "Common" or "Toilet" in their name become the unit's shared spaces. Everything else becomes a rentable room. If a property has no unit folders (D_Quince, Nest 2, PJS7, …), its rooms are grouped into a single unit.
 - To add a listing, drop a new folder in. To remove one, delete or move its folder. For the **live site**, then run `.\publish.cmd deploy` (see below). When running locally with the C# server, changes show up within 30 seconds.
 - Phone photos (several MB each) are resized to web-sized JPEGs on first view and cached in `App_Data/thumbs`. Videos are streamed with range requests, so visitors can seek without downloading the whole file.
 - Room types (Master, Middle, Single, Balcony, Partition, Studio…) are worked out from the folder name. They drive the filters.
@@ -112,7 +112,7 @@ Every property already has an entry. Fill in whatever you have:
   }
 },
 "rooms": {
-  "Vierra/B-11-15/Master Room 1": { "price": 900, "status": "available", "notes": "Attached bathroom, available 1 Dec" }
+  "Vierra/B-10-05/Master Room 1": { "price": 900, "status": "available", "notes": "Attached bathroom, available 1 Dec" }
 }
 ```
 
@@ -181,13 +181,7 @@ The last command must run from the `website` folder, not `client`, so the video 
 
 **Video playback:** Cloudflare Pages serves static files without HTTP Range support, which stops browsers jumping ahead in videos and can stop iPhones playing them at all. The small Pages Function in `functions/v/[file].js` answers those requests for videos (served from `/v/`). Only videos are routed to it (`client/public/_routes.json`), so photos don't count towards the free plan's 100,000 function requests a day. Always deploy from the `website` folder (as `publish-static.ps1` does) so the function is included.
 
-**Free plan limits:** 25 MB per file and 20,000 files. The export skips videos over 25 MB and lists them in the output. These 3 are skipped at the moment:
-
-- `Sunway Belfield (Actual)/A-43-10 (4 ROOMS)/IMG_2296.MOV` (1 GB)
-- `Sunway Belfield (Actual)/B-35-08 (3 ROOMS)/Common Area/IMG_4403.MOV` (27 MB)
-- `The Arcuz/28-13A/Common Area/IMG_1899.MOV` (40 MB)
-
-To include them, compress each one below 25 MB (for example with the free HandBrake app, or by sending it to yourself on WhatsApp and saving the compressed copy), replace the file in its folder, and publish again.
+**Free plan limits:** 25 MB per file and 20,000 files. The export skips videos over 25 MB and lists them in its output (3 at the moment). To include them, compress each one below 25 MB (for example with the free HandBrake app, or by sending it to yourself on WhatsApp and saving the compressed copy), replace the file in its folder, and publish again.
 
 ## Production build with the C# server (optional, needs paid hosting)
 
@@ -207,7 +201,8 @@ When deploying, copy the media folders to the server too. Then set `Media:RootPa
 
 ## Known limitations
 
-- `Sunway Belfield (Actual)/A-43-10 (4 ROOMS)/IMG_2296.MOV` is HEVC (H.265). It plays in Safari and Edge but may not play in Chrome or Firefox on Windows. Re-export it as H.264 if needed. The other 99 videos are H.264 and play everywhere.
-- Some photos are reused across units (for example Petalz A-20-01 and A-22-12, Vierra A-29-20 and A-32-10). Check that each unit shows its own room.
+- One video is HEVC (H.265), which may not play in Chrome or Firefox on Windows; it's also over 25 MB, so it's currently skipped. Re-export it as H.264. All other videos are H.264 and play everywhere.
+- A few photos are reused across different units. Check that each unit shows its own room.
+- **Unit numbers are never published.** Rooms get a reference code (for example `RC-7K2M`) built with the private `Media:RefSalt` in `appsettings.Local.json`. Each export writes the private lookup `room-codes.csv` (code → property, unit, room) next to `deploy/`; it's git-ignored and never uploaded. Keep the salt unchanged and backed up, or every room code and link changes.
 - .NET 7 is out of Microsoft support. Moving the project to .NET 8 or later (change `TargetFramework` to `net8.0` and install the .NET 8 SDK) is recommended before public hosting.
 - The site is a single-page app, so link previews on WhatsApp and Facebook show the generic site title rather than the specific room.

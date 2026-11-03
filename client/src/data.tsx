@@ -75,7 +75,8 @@ export function useData() {
   return ctx;
 }
 
-export const unitLabel = (property: Property, unit: Unit) => (unit.name ? `${property.name} · ${unit.name}` : property.name);
+/** Where a room is, as shown to visitors: the property only. Unit numbers are never shown. */
+export const placeLabel = (property: Property) => property.name;
 
 /** Distinct property areas, alphabetically, for the area filters. */
 export const areaList = (properties: Property[]) =>
@@ -90,8 +91,7 @@ export const countMedia = (items: { kind: string }[]) => ({
 
 export function enquiryMessage(entry: RoomEntry | null, property: Property | null, pageUrl: string) {
   if (entry) {
-    const where = entry.unit.name ? `${entry.property.name} (unit ${entry.unit.name})` : entry.property.name;
-    return `Hi! I saw the ${entry.room.name} at ${where} on your website and I'm interested. Is it still available? ${pageUrl}`;
+    return `Hi! I saw the ${entry.room.name} at ${entry.property.name} (ref ${entry.room.code}) on your website and I'm interested. Is it still available? ${pageUrl}`;
   }
   if (property) {
     return `Hi! I'm interested in renting a room at ${property.name}. Which rooms are available now? ${pageUrl}`;

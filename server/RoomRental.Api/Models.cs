@@ -1,15 +1,24 @@
+using System.Text.Json.Serialization;
+
 namespace RoomRental.Api;
 
-public sealed record MediaItem(string Id, string Kind, string FileName, long Size);
+// Fields marked [JsonIgnore] are used while building but never published: original file names and
+// folder paths can contain unit numbers, which the public site must not reveal.
 
+public sealed record MediaItem(string Id, string Kind, [property: JsonIgnore] string FileName, long Size);
+
+/// <param name="Code">Public reference such as "RC-7K2M" that customers quote and agents look up privately.</param>
+/// <param name="Folder">Folder path below the media root (internal; contains the unit number).</param>
 public sealed record Room(
     string Id,
+    string Code,
     string Name,
     string Type,
     decimal? Price,
     string? Status,
     string? Notes,
-    IReadOnlyList<MediaItem> Media);
+    IReadOnlyList<MediaItem> Media,
+    [property: JsonIgnore] string Folder);
 
 public sealed record Unit(
     string Id,
@@ -21,7 +30,7 @@ public sealed record Unit(
 public sealed record Property(
     string Id,
     string Name,
-    string FolderName,
+    [property: JsonIgnore] string FolderName,
     string? Area,
     string? Address,
     string? Description,
@@ -32,6 +41,9 @@ public sealed record Property(
     IReadOnlyList<Unit> Units);
 
 public sealed record Catalogue(DateTimeOffset GeneratedAt, IReadOnlyList<Property> Properties);
+
+/// <summary>Private lookup row: a room's public code and where it really is. Written to room-codes.csv, never published.</summary>
+public sealed record RoomReference(string Code, string Property, string? Area, string Unit, string Room, string Type, string Folder);
 
 /// <summary>Shape of Data/listings.json. Keys are folder names / relative folder paths as they appear on disk.</summary>
 public sealed class Listings

@@ -58,7 +58,7 @@ export function PropertyPage() {
           {property.units.map((unit) => (
             <section key={unit.id} className="unit-section">
               <div className="section-head">
-                <h2>{unit.name ? `Unit ${unit.name}` : 'Rooms'}</h2>
+                <h2>{unit.name || 'Rooms'}</h2>
                 {unit.roomsNote && <span className="pill subtle">{unit.roomsNote}</span>}
               </div>
               <div className="grid grid-3">

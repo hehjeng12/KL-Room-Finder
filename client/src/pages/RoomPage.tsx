@@ -6,7 +6,7 @@ import { ContactButtons } from '../components/ContactButtons';
 import { LinkIcon } from '../components/Icons';
 import { Gallery, MediaGrid } from '../components/Media';
 import { SaveButton } from '../components/SaveButton';
-import { countMedia, enquiryMessage, unitLabel, useData, useDocumentTitle } from '../data';
+import { countMedia, enquiryMessage, placeLabel, useData, useDocumentTitle } from '../data';
 import { ROOM_TYPES } from './roomTypes';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -15,7 +15,7 @@ export function RoomPage() {
   const { findRoom, rooms, site } = useData();
   const entry = findRoom(roomId);
   const [copied, setCopied] = useState(false);
-  useDocumentTitle(entry ? `${entry.room.name} at ${unitLabel(entry.property, entry.unit)}` : 'Not found');
+  useDocumentTitle(entry ? `${entry.room.name} at ${placeLabel(entry.property)}` : 'Not found');
 
   if (!entry) return <NotFoundPage />;
   const { room, unit, property } = entry;
@@ -45,12 +45,11 @@ export function RoomPage() {
     <div className="container page">
       <nav className="breadcrumb dark">
         <Link to="/">Home</Link> / <Link to={`/p/${property.id}`}>{property.name}</Link>
-        {unit.name && <> / <span>{unit.name}</span></>}
       </nav>
 
       <div className="room-layout">
         <div className="room-main">
-          <Gallery items={room.media} title={`${room.name}, ${unitLabel(property, unit)}`} />
+          <Gallery items={room.media} title={`${room.name}, ${placeLabel(property)}`} />
         </div>
 
         <aside className="sticky-panel">
@@ -59,7 +58,8 @@ export function RoomPage() {
             <StatusBadge status={room.status} />
           </div>
           <h1 className="room-title">{room.name}</h1>
-          <p className="muted">{unitLabel(property, unit)}{property.area ? ` · ${property.area}` : ''}</p>
+          <p className="muted">{placeLabel(property)}{property.area ? ` · ${property.area}` : ''}</p>
+          <p className="room-ref">Ref <strong>{room.code}</strong> <span className="muted">· quote this when you message</span></p>
           <p className="room-price">{price ? <>{price}<small> / month</small></> : 'Contact me for price'}</p>
           {typeInfo && <p className="small muted">{typeInfo.blurb}.</p>}
           {room.notes && <p className="notes">{room.notes}</p>}
@@ -77,9 +77,9 @@ export function RoomPage() {
 
       {unit.sharedMedia.length > 0 && (
         <section className="section">
-          <h2>Shared spaces{unit.name ? ` in unit ${unit.name}` : ''}</h2>
+          <h2>Shared spaces in this unit</h2>
           <p className="muted">Living room, kitchen, bathrooms and other common areas.</p>
-          <MediaGrid items={unit.sharedMedia} title={`${unitLabel(property, unit)} – shared spaces`} />
+          <MediaGrid items={unit.sharedMedia} title={`${placeLabel(property)} – shared spaces`} />
         </section>
       )}
 

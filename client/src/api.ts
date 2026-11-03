@@ -3,12 +3,13 @@ export type MediaKind = 'photo' | 'video';
 export interface MediaItem {
   id: string;
   kind: MediaKind;
-  fileName: string;
   size: number;
 }
 
 export interface Room {
   id: string;
+  /** Public reference (e.g. "RC-7K2M"); the agent's private room-codes.csv maps it to the real unit. */
+  code: string;
   name: string;
   type: string;
   price: number | null;
@@ -19,6 +20,7 @@ export interface Room {
 
 export interface Unit {
   id: string;
+  /** Neutral label ("Unit 1", "Unit 2"), never the real unit number; empty when a property has no unit folders. */
   name: string;
   roomsNote: string | null;
   sharedMedia: MediaItem[];
@@ -28,7 +30,6 @@ export interface Unit {
 export interface Property {
   id: string;
   name: string;
-  folderName: string;
   area: string | null;
   address: string | null;
   description: string | null;

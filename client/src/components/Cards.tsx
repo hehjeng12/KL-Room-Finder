@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatPrice, type Property } from '../api';
-import { countMedia, roomCover, unitLabel, useData, type RoomEntry } from '../data';
+import { countMedia, placeLabel, roomCover, useData, type RoomEntry } from '../data';
 import { CameraIcon, PinIcon, VideoIcon } from './Icons';
 import { MediaThumb } from './Media';
 import { SaveButton } from './SaveButton';
@@ -14,7 +14,7 @@ export function StatusBadge({ status }: { status: string | null }) {
 
 export function RoomCard({ entry, showProperty = true }: { entry: RoomEntry; showProperty?: boolean }) {
   const { site } = useData();
-  const { room, unit, property } = entry;
+  const { room, property } = entry;
   const { photos, videos } = countMedia(room.media);
   const price = formatPrice(room.price, site.currency);
 
@@ -27,8 +27,7 @@ export function RoomCard({ entry, showProperty = true }: { entry: RoomEntry; sho
         <SaveButton roomId={room.id} />
       </div>
       <div className="card-body">
-        {showProperty && <p className="eyebrow">{unitLabel(property, unit)}</p>}
-        {!showProperty && unit.name && <p className="eyebrow">Unit {unit.name}</p>}
+        {showProperty && <p className="eyebrow">{placeLabel(property)}</p>}
         <h3>{room.name}</h3>
         <div className="card-meta">
           <span><CameraIcon size={16} /> {photos}</span>

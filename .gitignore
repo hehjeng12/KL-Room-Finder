@@ -487,3 +487,6 @@ deploy/
 # Personal contact details and rednote QR stay on this PC only (see README)
 appsettings.Local.json
 client/public/rednote-qr.png
+
+# Private room code -> unit lookup written by the export
+room-codes.csv

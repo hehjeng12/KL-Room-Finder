@@ -48,6 +48,12 @@ public sealed class MediaOptions
     /// </summary>
     public string[] ExtraRootPaths { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// Secret mixed into room reference codes and ids so they can't be reversed to unit numbers.
+    /// Keep it in appsettings.Local.json and never change it, or every room code and link changes.
+    /// </summary>
+    public string RefSalt { get; set; } = "";
+
     /// <summary>Top-level folder names that are never published (for example this website's own source).</summary>
     public string[] ExcludedFolders { get; set; } = Array.Empty<string>();
 

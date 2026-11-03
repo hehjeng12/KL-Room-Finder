@@ -77,12 +77,30 @@ public static class StaticExporter
         await File.WriteAllTextAsync(Path.Combine(dataDir, "catalogue.json"), JsonSerializer.Serialize(catalogue, Json));
         await File.WriteAllTextAsync(Path.Combine(dataDir, "site.json"), JsonSerializer.Serialize(site, Json));
 
+        // The private code → unit lookup goes next to the deploy folder, never inside it (it would be published).
+        var codesFile = Path.Combine(Path.GetDirectoryName(outputDir)!, "room-codes.csv");
+        await WriteRoomCodesAsync(codesFile, catalogueService.GetRoomReferences());
+
         log.LogInformation("Export finished: {Count} photos/videos written to {Output}", media.Count, outputDir);
+        log.LogInformation("Private room code list (do not share): {File}", codesFile);
         foreach (var s in skipped)
         {
             log.LogWarning("Skipped video over 25 MB (too large for free hosting; compress it to include it): {File}", s);
         }
         return 0;
+    }
+
+    /// <summary>Code, property, area, unit, room, type, link and folder for each room; opens in Excel or Google Sheets.</summary>
+    private static async Task WriteRoomCodesAsync(string path, IReadOnlyList<RoomReference> references)
+    {
+        static string Csv(string? value) => $"\"{(value ?? "").Replace("\"", "\"\"")}\"";
+        var lines = new List<string> { "Code,Property,Area,Unit,Room,Type,Link,Folder" };
+        lines.AddRange(references
+            .OrderBy(r => r.Code, StringComparer.OrdinalIgnoreCase)
+            .Select(r => string.Join(',', Csv(r.Code), Csv(r.Property), Csv(r.Area), Csv(r.Unit), Csv(r.Room), Csv(r.Type),
+                Csv($"/r/{r.Code.ToLowerInvariant()}"), Csv(r.Folder))));
+        // UTF-8 with a BOM so Excel shows any non-English text correctly.
+        await File.WriteAllLinesAsync(path, lines, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
     }
 
     private static Catalogue Filter(Catalogue catalogue, Func<MediaItem, bool> keep)

@@ -317,6 +317,8 @@ code { background: rgba(0, 0, 0, 0.08); padding: 0.1em 0.35em; border-radius: 4p
 .facts { list-style: none; padding: 0; margin: 4px 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .facts li { padding: 4px 10px; border-radius: 999px; background: var(--bg); font-size: 0.83rem; font-weight: 600; color: var(--muted); }
 .share { margin-top: 4px; }
+.room-ref { margin: 2px 0 0; font-size: 0.9rem; letter-spacing: 0.02em; }
+.room-ref .muted { font-size: 0.82rem; letter-spacing: 0; }
 .confirm-note { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; border-left: 3px solid var(--accent); background: rgba(246, 196, 83, 0.14); font-size: 0.88rem; color: var(--ink); }
 
 /* ---------- Shortlist ---------- */

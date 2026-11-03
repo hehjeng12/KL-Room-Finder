@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { unitLabel, useData, type RoomEntry } from './data';
+import { placeLabel, useData, type RoomEntry } from './data';
 
 const STORAGE_KEY = 'kl-room-finder:shortlist';
 /** Keeps the combined WhatsApp message a sensible length. */
@@ -65,7 +65,7 @@ export function useShortlist() {
 
 /** One enquiry listing every saved room with its link, so the agent can check them all in one go. */
 export function shortlistMessage(entries: RoomEntry[], origin: string) {
-  const lines = entries.map((e, i) => `${i + 1}. ${e.room.name} – ${unitLabel(e.property, e.unit)}\n   ${origin}/r/${e.room.id}`);
+  const lines = entries.map((e, i) => `${i + 1}. ${e.room.name} – ${placeLabel(e.property)} (ref ${e.room.code})\n   ${origin}/r/${e.room.id}`);
   return entries.length === 1
     ? `Hi! I'm interested in this room from your website:\n\n${lines.join('\n')}\n\nIs it still available?`
     : `Hi! I'm interested in these ${entries.length} rooms from your website:\n\n${lines.join('\n')}\n\nAre they still available?`;

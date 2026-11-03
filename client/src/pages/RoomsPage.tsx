@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RoomCard } from '../components/Cards';
 import { SearchIcon } from '../components/Icons';
-import { areaList, unitLabel, useData, useDocumentTitle } from '../data';
+import { areaList, placeLabel, useData, useDocumentTitle } from '../data';
 import { ROOM_TYPES } from './roomTypes';
 
 type Sort = 'default' | 'price' | 'media';
@@ -40,7 +40,7 @@ export function RoomsPage() {
       if (videoOnly && !r.room.media.some((m) => m.kind === 'video')) return false;
       if (hideTaken && r.room.status?.toLowerCase() === 'taken') return false;
       if (needle) {
-        const hay = `${unitLabel(r.property, r.unit)} ${r.room.name} ${r.room.type} ${r.property.area ?? ''}`.toLowerCase();
+        const hay = `${placeLabel(r.property)} ${r.room.name} ${r.room.type} ${r.room.code} ${r.property.area ?? ''}`.toLowerCase();
         if (!needle.split(/\s+/).every((w) => hay.includes(w))) return false;
       }
       return true;
@@ -62,7 +62,7 @@ export function RoomsPage() {
       <div className="filters">
         <label className="search compact">
           <SearchIcon />
-          <input value={q} onChange={(e) => update('q', e.target.value)} placeholder="Search property, unit or room" aria-label="Search rooms" />
+          <input value={q} onChange={(e) => update('q', e.target.value)} placeholder="Search property, room or ref code" aria-label="Search rooms" />
         </label>
         {areas.length > 0 && (
           <select value={area} onChange={(e) => { const next = new URLSearchParams(params); if (e.target.value) next.set('area', e.target.value); else next.delete('area'); next.delete('property'); setParams(next, { replace: true }); }} aria-label="Area">

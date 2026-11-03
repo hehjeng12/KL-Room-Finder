@@ -92,9 +92,86 @@ public sealed partial class CatalogueService
         }
 
         var properties = byFolder.Values.OrderBy(p => p.FolderName, NaturalComparer.Instance).ToList();
+        var (published, references) = Anonymise(properties);
         _logger.LogInformation("Catalogue built from {Roots} folder(s): {Properties} properties, {Media} media files",
-            RootPaths.Count, properties.Count, mediaPaths.Count);
-        return new Snapshot(new Catalogue(DateTimeOffset.UtcNow, properties), mediaPaths);
+            RootPaths.Count, published.Count, mediaPaths.Count);
+        return new Snapshot(new Catalogue(DateTimeOffset.UtcNow, published), mediaPaths, references);
+    }
+
+    /// <summary>Every room's public code with its real property, unit and folder, for the agent's private lookup list.</summary>
+    public IReadOnlyList<RoomReference> GetRoomReferences() => GetSnapshot().References;
+
+    /// <summary>
+    /// Removes unit numbers from everything the public sees. Units become "Unit 1", "Unit 2"… per property, and
+    /// room / unit / property ids become codes built with a private salt, so links can't be traced back to a unit.
+    /// The real locations go only into the returned references.
+    /// </summary>
+    private (List<Property> Published, List<RoomReference> References) Anonymise(List<Property> properties)
+    {
+        if (string.IsNullOrWhiteSpace(_options.RefSalt))
+        {
+            _logger.LogWarning("Media:RefSalt is not set; room codes could be reversed to unit numbers. Set it in appsettings.Local.json.");
+        }
+
+        var usedCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var usedPropertyIds = new HashSet<string>(StringComparer.Ordinal);
+        var references = new List<RoomReference>();
+        var published = new List<Property>();
+
+        foreach (var property in properties)
+        {
+            var propertyId = Slug(property.Name);
+            for (var n = 2; !usedPropertyIds.Add(propertyId); n++) propertyId = $"{Slug(property.Name)}-{n}";
+
+            var prefix = CodePrefix(property.Name);
+            var unitNumber = 0;
+            var units = new List<Unit>();
+            foreach (var unit in property.Units)
+            {
+                var rooms = new List<Room>();
+                foreach (var room in unit.Rooms)
+                {
+                    var code = UniqueCode(prefix, room.Id, usedCodes);
+                    references.Add(new RoomReference(code, property.Name, property.Area, unit.Name, room.Name, room.Type, room.Folder));
+                    rooms.Add(room with { Id = code.ToLowerInvariant(), Code = code });
+                }
+                // The unnamed unit (properties without unit folders) stays unnamed.
+                var label = unit.Name.Length == 0 ? "" : $"Unit {++unitNumber}";
+                units.Add(unit with { Id = $"u-{SaltedHash(unit.Id, 8).ToLowerInvariant()}", Name = label, Rooms = rooms });
+            }
+            published.Add(property with { Id = propertyId, Units = units });
+        }
+        return (published, references);
+    }
+
+    /// <summary>"Razak City" → "RC", "Tiara Mutiara 1" → "TM1", "Vierra" → "VIE", "PV13" → "PV13".</summary>
+    private static string CodePrefix(string name)
+    {
+        var words = Regex.Split(name.ToUpperInvariant(), "[^A-Z0-9]+").Where(w => w.Length > 0).ToArray();
+        if (words.Length == 0) return "RM";
+        if (words.Length > 1) return string.Concat(words.Select(w => w.All(char.IsDigit) ? w : w[..1]));
+        var word = words[0];
+        return word.Any(char.IsDigit) ? word[..Math.Min(5, word.Length)] : word[..Math.Min(3, word.Length)];
+    }
+
+    private string UniqueCode(string prefix, string seed, HashSet<string> used)
+    {
+        for (var length = 4; ; length++)
+        {
+            var code = $"{prefix}-{SaltedHash(seed, length)}";
+            if (used.Add(code)) return code;
+        }
+    }
+
+    // Crockford base32: no I, L, O or U, so codes are easy to read out and type.
+    private const string CodeAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+    private string SaltedHash(string value, int length)
+    {
+        var hash = HMACSHA256.HashData(Encoding.UTF8.GetBytes(_options.RefSalt), Encoding.UTF8.GetBytes(value));
+        var chars = new char[length];
+        for (var i = 0; i < length; i++) chars[i] = CodeAlphabet[hash[i] % CodeAlphabet.Length];
+        return new string(chars);
     }
 
     /// <summary>Combines the same property found in two media folders: matching units and rooms are joined.</summary>
@@ -129,7 +206,7 @@ public sealed partial class CatalogueService
     {
         var units = new List<Unit>();
 
-        // Folders named like a unit number (A-11-07, 09-03, D3-26-08) are units. Anything else directly
+        // Folders named like a unit number (A-12-03, 08-05, C2-15-07) are units. Anything else directly
         // under the property (e.g. "Room 1", "Common area") belongs to a single unnamed unit.
         var implicitRooms = new List<Room>();
         var implicitShared = new List<MediaItem>(CollectMedia(dir, mediaPaths));
@@ -180,7 +257,7 @@ public sealed partial class CatalogueService
         {
             if (IsUnitFolder(child.Name))
             {
-                // A nested copy of the unit folder (e.g. "A-09-03A (2 ROOMS)/09-03A") is treated as unit-wide media.
+                // A nested copy of the unit folder (e.g. "B-10-05A (2 ROOMS)/10-05A") is treated as unit-wide media.
                 shared.AddRange(CollectMediaRecursive(child, mediaPaths));
                 continue;
             }
@@ -196,8 +273,8 @@ public sealed partial class CatalogueService
         {
             var key = RelativeKey(dir.FullName);
             listings.Rooms.TryGetValue(key, out var roomListing);
-            rooms.Add(new Room(Slug(key), roomsNote is null ? "Rooms in this unit" : $"{roomsNote} available", "Unit tour",
-                roomListing?.Price, NullIfBlank(roomListing?.Status), NullIfBlank(roomListing?.Notes), shared.ToList()));
+            rooms.Add(new Room(Slug(key), "", roomsNote is null ? "Rooms in this unit" : $"{roomsNote} available", "Unit tour",
+                roomListing?.Price, NullIfBlank(roomListing?.Status), NullIfBlank(roomListing?.Notes), shared.ToList(), key));
             shared.Clear();
         }
 
@@ -221,8 +298,8 @@ public sealed partial class CatalogueService
         {
             var key = RelativeKey(dir.FullName);
             listings.Rooms.TryGetValue(key, out var roomListing);
-            rooms.Add(new Room(Slug(key), name, ClassifyRoom(name), roomListing?.Price,
-                NullIfBlank(roomListing?.Status), NullIfBlank(roomListing?.Notes), media));
+            rooms.Add(new Room(Slug(key), "", name, ClassifyRoom(name), roomListing?.Price,
+                NullIfBlank(roomListing?.Status), NullIfBlank(roomListing?.Notes), media, key));
         }
 
         // Grouped rooms, e.g. "Big Single With Shared Bathroom (R2 & R3)/Room 2".
@@ -354,7 +431,7 @@ public sealed partial class CatalogueService
 
     private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    // A-11-07, 09-03, D3-26-08, T2-37-05, and with a block name in front: "PV16 13-17".
+    // A-12-03, 08-05, C2-15-07, T1-10-02, and with a block name in front: "Block 10-08".
     [GeneratedRegex(@"^([A-Za-z]+\d*\s+)?([A-Za-z]\d?-)?\d{1,3}[A-Za-z]?-\d{1,3}[A-Za-z]?\b")]
     private static partial Regex UnitRegex();
 
@@ -364,7 +441,7 @@ public sealed partial class CatalogueService
     [GeneratedRegex(@"\bR?(\d{1,2})\b(?!.*\bR?\d{1,2}\b)", RegexOptions.IgnoreCase)]
     private static partial Regex RoomNumberRegex();
 
-    private sealed record Snapshot(Catalogue Catalogue, Dictionary<string, string> MediaPaths);
+    private sealed record Snapshot(Catalogue Catalogue, Dictionary<string, string> MediaPaths, List<RoomReference> References);
 }
 
 /// <summary>Sorts "Room 2" before "Room 10".</summary>
