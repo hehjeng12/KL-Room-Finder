@@ -89,11 +89,22 @@ export function fullEnquiry(site: SiteInfo, message: string) {
   return template ? `${message}\n\n${template}` : message;
 }
 
+const isPhone = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+/** Removes emojis (and the joiners/variation selectors that go with them) plus the spaces they leave behind. */
+export const stripEmoji = (text: string) =>
+  text
+    .replace(/\p{Extended_Pictographic}|️|‍/gu, '')
+    .replace(/^[ \t]+/gm, '')
+    .replace(/[ \t]+(\*?)$/gm, '$1');
+
 export function whatsAppLink(site: SiteInfo, message: string) {
   const number = site.whatsAppNumber.replace(/\D/g, '');
   if (!number) return null;
   // Not wa.me: its redirect replaces every emoji in the text with "�".
-  return `https://api.whatsapp.com/send/?phone=${number}&text=${encodeURIComponent(fullEnquiry(site, message))}`;
+  // WhatsApp Web / Desktop still lose emojis that arrive in a link, so computers get the text without them.
+  const text = isPhone() ? fullEnquiry(site, message) : stripEmoji(fullEnquiry(site, message));
+  return `https://api.whatsapp.com/send/?phone=${number}&text=${encodeURIComponent(text)}`;
 }
 
 export function messengerLink(site: SiteInfo, message: string) {

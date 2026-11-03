@@ -66,5 +66,7 @@ export function useShortlist() {
 /** One enquiry listing every saved room with its link, so the agent can check them all in one go. */
 export function shortlistMessage(entries: RoomEntry[], origin: string) {
   const lines = entries.map((e, i) => `${i + 1}. ${e.room.name} – ${unitLabel(e.property, e.unit)}\n   ${origin}/r/${e.room.id}`);
-  return `Hi! I'm interested in these ${entries.length === 1 ? 'room' : `${entries.length} rooms`} from your website:\n\n${lines.join('\n')}\n\nAre they still available?`;
+  return entries.length === 1
+    ? `Hi! I'm interested in this room from your website:\n\n${lines.join('\n')}\n\nIs it still available?`
+    : `Hi! I'm interested in these ${entries.length} rooms from your website:\n\n${lines.join('\n')}\n\nAre they still available?`;
 }
